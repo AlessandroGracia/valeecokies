@@ -70,8 +70,8 @@ const Sidebar = () => {
       {/* Logo */}
       <div className="p-6 border-b border-white/10">
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 bg-white rounded-xl overflow-hidden shadow-lg ring-2 ring-white/20 flex-shrink-0 hover:ring-amber-400/50 transition-all duration-300 p-1.5 flex items-center justify-center">
-            <img src="/logo.png" alt="Logo" className="w-full h-full object-contain" />
+          <div className="w-11 h-11 rounded-xl overflow-hidden shadow-lg ring-2 ring-white/20 flex-shrink-0 hover:ring-amber-400/50 transition-all duration-300 flex items-center justify-center">
+            <img src="/logo.png" alt="Logo" className="w-full h-full object-cover" />
           </div>
           <div>
             <h1 className="text-lg font-bold font-['Poppins'] tracking-tight">Valeecokies</h1>
@@ -110,7 +110,6 @@ const Sidebar = () => {
             <p className="text-[11px] text-amber-400/70 capitalize">{user?.role || 'vendedor'}</p>
           </div>
         </div>
-        <p className="text-[9px] text-white/20 px-1 mb-2">Version: V-2</p>
         <button 
           onClick={logout}
           className="w-full bg-white/10 hover:bg-red-600/80 rounded-lg py-2 text-sm flex items-center justify-center gap-2 transition-all duration-300 text-amber-200 hover:text-white"

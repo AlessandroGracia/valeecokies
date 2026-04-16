@@ -264,8 +264,8 @@ const POS = () => {
 
       {/* ===== SIDEBAR CATEGORÍAS ===== */}
       <div className="w-[88px] bg-white border-r border-gray-200 flex flex-col items-center py-5 gap-1 shadow-md">
-        <div className="w-12 h-12 bg-white rounded-xl overflow-hidden shadow-md mb-5 ring-2 ring-amber-100 p-1 flex items-center justify-center">
-          <img src="/logo.png" alt="Logo" className="w-full h-full object-contain" />
+        <div className="w-12 h-12 rounded-xl overflow-hidden shadow-md mb-5 ring-2 ring-amber-100 flex items-center justify-center">
+          <img src="/logo.png" alt="Logo" className="w-full h-full object-cover" />
         </div>
 
         {categories.map(cat => (
@@ -482,14 +482,14 @@ const POS = () => {
 
           {/* Input de efectivo + teclado */}
           <div className="px-5 pb-3">
-            <div className="bg-gray-50 rounded-xl p-3 border border-gray-100">
-              <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Monto recibido</p>
+            <div className="bg-gray-100 rounded-xl p-3 border border-gray-200 shadow-inner group-focus-within:border-amber-400 transition-all">
+              <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Monto recibido</p>
               <input
                 type="number"
                 value={paymentReceived}
                 onChange={(e) => setPaymentReceived(e.target.value)}
                 placeholder="0.00"
-                className="w-full bg-transparent text-right text-2xl font-bold outline-none text-gray-900 placeholder:text-gray-300"
+                className="w-full bg-transparent text-right text-2xl font-bold outline-none text-gray-900 placeholder:text-gray-400"
               />
             </div>
           </div>
@@ -542,7 +542,7 @@ const POS = () => {
             <button
               onClick={processSale}
               disabled={!paymentReceived || cart.length === 0 || processing || change < 0}
-              className="w-full bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 disabled:from-gray-300 disabled:to-gray-300 disabled:cursor-not-allowed text-white rounded-xl py-3.5 font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-amber-600/20 hover:shadow-amber-600/30 disabled:shadow-none hover:-translate-y-0.5 disabled:translate-y-0 active:translate-y-0"
+              className="w-full bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 disabled:from-gray-400 disabled:to-gray-400 disabled:text-white/60 disabled:cursor-not-allowed text-white rounded-xl py-3.5 font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-amber-600/20 hover:shadow-amber-600/30 disabled:shadow-none hover:-translate-y-0.5 disabled:translate-y-0 active:translate-y-0"
             >
               {processing ? (
                 <>
