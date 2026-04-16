@@ -137,20 +137,20 @@ const Products = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
+    <div className="min-h-screen bg-gray-50 p-4 lg:p-8 pt-20 lg:pt-8 overflow-auto">
       <div className="max-w-7xl mx-auto">
         {/* Encabezado */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
+            <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 flex items-center gap-3">
               <Package className="w-8 h-8 text-amber-600" />
               Gestión de Inventario
             </h1>
-            <p className="text-gray-500 mt-1">Administra tus galletas, postres y bebidas</p>
+            <p className="text-sm text-gray-500 mt-1">Administra tus galletas, postres y bebidas</p>
           </div>
           <button 
             onClick={() => handleOpenModal()}
-            className="bg-amber-600 hover:bg-amber-700 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 shadow-lg transition-transform hover:-translate-y-1"
+            className="w-full sm:w-auto bg-amber-600 hover:bg-amber-700 text-white px-6 py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg transition-transform hover:-translate-y-1"
           >
             <Plus className="w-5 h-5" />
             NUEVO PRODUCTO
@@ -158,7 +158,7 @@ const Products = () => {
         </div>
 
         {/* Filtros */}
-        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex gap-4 mb-6">
+        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col md:flex-row gap-4 mb-6">
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-3 text-gray-400 w-5 h-5" />
             <input 
@@ -169,10 +169,10 @@ const Products = () => {
               className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500"
             />
           </div>
-          <div className="flex bg-gray-100 p-1 rounded-lg">
+          <div className="flex bg-gray-100 p-1 rounded-lg overflow-x-auto no-scrollbar shrink-0">
             <button 
               onClick={() => setFilterCategory('all')}
-              className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${filterCategory === 'all' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-600 hover:text-gray-900'}`}
+              className={`whitespace-nowrap px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${filterCategory === 'all' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-600 hover:text-gray-900'}`}
             >
               Todos
             </button>
@@ -180,7 +180,7 @@ const Products = () => {
               <button 
                 key={cat.id}
                 onClick={() => setFilterCategory(cat.id)}
-                className={`flex items-center gap-1 px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${filterCategory === cat.id ? 'bg-white shadow-sm text-gray-900' : 'text-gray-600 hover:text-gray-900'}`}
+                className={`whitespace-nowrap flex items-center gap-1 px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${filterCategory === cat.id ? 'bg-white shadow-sm text-gray-900' : 'text-gray-600 hover:text-gray-900'}`}
               >
                 <span>{cat.icon}</span> {cat.name}
               </button>
@@ -189,7 +189,7 @@ const Products = () => {
         </div>
 
         {/* Tabla */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-x-auto">
           {loading ? (
              <div className="p-12 pl-4 text-center">
                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600 mx-auto"></div>

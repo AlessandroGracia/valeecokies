@@ -46,6 +46,9 @@ const POS = () => {
   const [showReceipt, setShowReceipt] = useState(false);
   const [lastSaleData, setLastSaleData] = useState(null);
 
+  // Estado para el carrito móvil
+  const [isMobileCartOpen, setIsMobileCartOpen] = useState(false);
+
   // Cargar datos iniciales
   useEffect(() => {
     loadInitialData();
@@ -239,7 +242,7 @@ const POS = () => {
   }
 
   return (
-    <div className="flex h-screen bg-[#e8e4dc] relative">
+    <div className="flex h-full bg-[#e8e4dc] relative overflow-hidden flex-col lg:flex-row">
 
       {/* Overlay si la caja está cerrada */}
       {!cashRegisterOpen && !loading && (
@@ -262,9 +265,13 @@ const POS = () => {
         </div>
       )}
 
-      {/* ===== SIDEBAR CATEGORÍAS ===== */}
-      <div className="w-[88px] bg-white border-r border-gray-200 flex flex-col items-center py-5 gap-1 shadow-md">
-        <div className="w-12 h-12 rounded-xl overflow-hidden shadow-md mb-5 ring-2 ring-amber-100 flex items-center justify-center">
+      {/* ===== BARRA DE CATEGORÍAS (Responsive) ===== */}
+      <div className={`
+        bg-white border-gray-200 flex shadow-md z-20 shrink-0
+        flex-row w-full h-auto px-4 py-2 gap-2 overflow-x-auto no-scrollbar
+        lg:flex-col lg:w-24 lg:h-full lg:py-5 lg:gap-1 lg:border-r
+      `}>
+        <div className="hidden lg:flex w-12 h-12 rounded-xl overflow-hidden shadow-md mb-5 ring-2 ring-amber-100 items-center justify-center shrink-0">
           <img src="/logo.png" alt="Logo" className="w-full h-full object-cover" />
         </div>
 
@@ -272,20 +279,23 @@ const POS = () => {
           <button
             key={cat.id}
             onClick={() => setSelectedCategory(cat.id)}
-            className={`w-[68px] flex flex-col items-center gap-1 py-3 rounded-xl transition-all duration-200 ${selectedCategory === cat.id
-                ? 'bg-amber-50 text-amber-700 shadow-sm ring-1 ring-amber-200'
+            className={`
+              flex flex-col items-center gap-1 py-2 px-3 rounded-xl transition-all duration-200 shrink-0
+              lg:w-[68px] lg:py-3
+              ${selectedCategory === cat.id
+                ? 'bg-amber-100 text-amber-700 shadow-sm ring-1 ring-amber-200'
                 : 'text-gray-400 hover:bg-gray-50 hover:text-gray-600'
               }`}
           >
-            <span className="text-2xl">{cat.icon}</span>
-            <span className="text-[10px] font-semibold tracking-wide">{cat.name}</span>
+            <span className="text-xl lg:text-2xl">{cat.icon}</span>
+            <span className="text-[9px] lg:text-[10px] font-bold tracking-wide uppercase">{cat.name}</span>
           </button>
         ))}
 
-        <div className="mt-auto">
-          <Link to="/caja" className="w-[68px] flex flex-col items-center gap-1 py-3 rounded-xl text-gray-400 hover:bg-red-50 hover:text-red-500 transition-all">
+        <div className="lg:mt-auto flex items-center">
+          <Link to="/caja" className="lg:w-[68px] px-3 flex flex-col items-center gap-1 py-2 lg:py-3 rounded-xl text-gray-500 hover:bg-amber-50 hover:text-amber-700 transition-all shrink-0">
             <Clock className="w-5 h-5" />
-            <span className="text-[10px] font-semibold">Caja</span>
+            <span className="text-[9px] lg:text-[10px] font-bold uppercase">Caja</span>
           </Link>
         </div>
       </div>
@@ -314,9 +324,8 @@ const POS = () => {
           )}
         </div>
 
-        {/* Productos */}
-        <div className="flex-1 px-6 pb-4 overflow-y-auto">
-          <div className="grid grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3">
+        <div className="flex-1 px-4 lg:px-6 pb-20 lg:pb-4 overflow-y-auto">
+          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3">
             {products
               .filter(product => selectedCategory === 'all' || product.category === selectedCategory)
               .map(product => {
@@ -386,22 +395,30 @@ const POS = () => {
         </div>
       </div>
 
-      {/* ===== PANEL DERECHO: CARRITO ===== */}
-      <div className="w-[380px] bg-white border-l border-gray-200 flex flex-col shadow-xl">
+      {/* ===== PANEL: CARRITO (Responsive) ===== */}
+      <div className={`
+        fixed inset-0 lg:static z-40 lg:z-auto flex flex-col bg-white shadow-2xl lg:shadow-none transition-transform duration-300
+        ${isMobileCartOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'}
+        lg:w-[380px] lg:border-l lg:border-gray-200
+      `}>
 
         {/* Header del carrito */}
-        <div className="px-5 pt-5 pb-3 border-b border-gray-100">
-          <div className="flex items-center justify-between">
-            <h2 className="text-base font-bold text-gray-900 flex items-center gap-2 font-['Poppins']">
-              <ShoppingCart className="w-5 h-5 text-amber-600" />
-              Venta Actual
-            </h2>
+        <div className="px-5 pt-5 pb-3 border-b border-gray-100 flex items-center justify-between bg-white shrink-0">
+          <div className="flex items-center gap-2">
+            <ShoppingCart className="w-5 h-5 text-amber-600" />
+            <h2 className="text-base font-bold text-gray-900 font-['Poppins']">Venta Actual</h2>
             {totalItemsInCart > 0 && (
               <span className="bg-amber-100 text-amber-700 text-xs font-bold px-2.5 py-1 rounded-full">
-                {totalItemsInCart} {totalItemsInCart === 1 ? 'item' : 'items'}
+                {totalItemsInCart}
               </span>
             )}
           </div>
+          <button 
+            onClick={() => setIsMobileCartOpen(false)}
+            className="lg:hidden p-2 hover:bg-gray-100 rounded-lg text-gray-400"
+          >
+            <X className="w-6 h-6" />
+          </button>
         </div>
 
         {/* Items del carrito - scrollable */}
@@ -559,6 +576,30 @@ const POS = () => {
           </div>
         </div>
       </div>
+
+      {/* BOTÓN FLOTANTE: VER CARRITO (Solo Móvil) */}
+      {cart.length > 0 && !isMobileCartOpen && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-30 lg:hidden w-full px-4 max-w-sm">
+          <button
+            onClick={() => setIsMobileCartOpen(true)}
+            className="w-full bg-[#3d1c00] text-white py-4 rounded-2xl shadow-2xl flex items-center justify-between px-6 animate-bounceOnMount"
+          >
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <ShoppingCart className="w-6 h-6 text-amber-400" />
+                <span className="absolute -top-2 -right-2 bg-white text-[#3d1c00] text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-[#3d1c00]">
+                  {totalItemsInCart}
+                </span>
+              </div>
+              <span className="font-bold text-sm tracking-wide uppercase">Ver Carrito</span>
+            </div>
+            <div className="text-right">
+              <p className="text-[10px] text-amber-400/70 font-bold uppercase">Total</p>
+              <p className="text-lg font-black">${total.toFixed(2)}</p>
+            </div>
+          </button>
+        </div>
+      )}
 
       {/* MODAL DE FACTURA (TICKET) */}
       {showReceipt && lastSaleData && (

@@ -5,8 +5,8 @@
  * usando React Router para URLs reales y deep linking.
  */
 
-import React from 'react';
-import { BrowserRouter, Routes, Route, NavLink, Navigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { BrowserRouter, Routes, Route, NavLink, Navigate, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   ShoppingCart, 
@@ -14,7 +14,9 @@ import {
   Users, 
   CreditCard,
   LogOut,
-  PieChart
+  PieChart,
+  Menu as MenuIcon,
+  X as XIcon
 } from 'lucide-react';
 
 // Contexto
@@ -62,11 +64,20 @@ const MenuItem = ({ icon, label, to }) => (
 );
 
 // Componente de navegación lateral
-const Sidebar = () => {
+const Sidebar = ({ isOpen, onClose }) => {
   const { user, logout } = useAuth();
+  const location = useLocation();
+
+  // Cerrar sidebar al navegar (en móvil)
+  React.useEffect(() => {
+    if (isOpen) onClose();
+  }, [location.pathname]);
   
   return (
-    <div className="w-64 bg-gradient-to-b from-[#3d1c00] via-[#4a2200] to-[#2d1500] text-white h-screen flex flex-col shadow-2xl shadow-black/40">
+    <div className={`
+      fixed inset-y-0 left-0 z-50 w-64 bg-gradient-to-b from-[#3d1c00] via-[#4a2200] to-[#2d1500] text-white flex flex-col shadow-2xl transition-transform duration-300 transform
+      lg:static lg:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+    `}>
       {/* Logo */}
       <div className="p-6 border-b border-white/10">
         <div className="flex items-center gap-3">
@@ -124,27 +135,67 @@ const Sidebar = () => {
 
 import Login from './components/Login';
 
-function App() {
+function AppContent() {
   const { isAuthenticated } = useAuth();
+  const [isSidebarOpen, setSidebarOpen] = useState(false);
+  const location = useLocation();
 
-  // Si no está autenticado, solo mostramos las rutas públicas (Login)
   if (!isAuthenticated) {
     return (
-      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="*" element={<Navigate to="/login" replace />} />
-        </Routes>
-      </BrowserRouter>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
     );
   }
 
-  // Si está autenticado, mostramos toda la app normal
+  // Título dinámico basado en la ruta
+  const getPageTitle = () => {
+    const path = location.pathname;
+    if (path === '/pos') return 'Punto de Venta';
+    if (path === '/caja') return 'Caja Diaria';
+    if (path === '/dashboard') return 'Dashboard';
+    if (path === '/productos') return 'Inventario';
+    if (path === '/clientes') return 'Clientes';
+    if (path === '/reportes') return 'Reportes';
+    return 'Valeecokies';
+  };
+
   return (
-    <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-      <div className="flex h-screen overflow-hidden">
-        <Sidebar />
-        <div className="flex-1 overflow-auto">
+    <div className="flex h-screen bg-gray-50 overflow-hidden">
+      {/* Overlay para móvil */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden backdrop-blur-sm"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      <Sidebar isOpen={isSidebarOpen} onClose={() => setSidebarOpen(false)} />
+
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        {/* Header móvil */}
+        <header className="lg:hidden h-16 bg-[#3d1c00] text-white flex items-center justify-between px-4 shrink-0 shadow-md z-30">
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => setSidebarOpen(true)}
+              className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+            >
+              <MenuIcon className="w-6 h-6" />
+            </button>
+            <h1 className="font-bold text-lg truncate">{getPageTitle()}</h1>
+          </div>
+          <div className="w-10 h-10 bg-amber-700 rounded-xl flex items-center justify-center font-bold overflow-hidden ring-2 ring-amber-500/30 shadow-inner">
+             <img 
+               src={useAuth().user?.username ? `/${useAuth().user.username}.png` : '/vendedor1.png'} 
+               alt="User" 
+               className="w-full h-full object-cover" 
+               onError={(e) => { e.target.style.display = 'none'; }} 
+             />
+          </div>
+        </header>
+
+        <div className="flex-1 overflow-auto relative">
           <Routes>
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="/pos" element={<POS />} />
@@ -158,7 +209,10 @@ function App() {
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>
         </div>
-      </div>
+function App() {
+  return (
+    <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+      <AppContent />
     </BrowserRouter>
   );
 }

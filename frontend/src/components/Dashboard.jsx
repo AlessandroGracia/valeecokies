@@ -84,7 +84,7 @@ const Dashboard = () => {
   const totalCompleted = data.sales?.completed_sales || 0;
 
   return (
-    <div className="min-h-screen bg-[#f8f7f4] p-6 lg:p-8 overflow-auto">
+    <div className="min-h-screen bg-[#f8f7f4] p-6 lg:p-8 pt-20 lg:pt-8 overflow-auto pb-10">
       <div className="max-w-7xl mx-auto">
 
         {/* ===== HEADER ===== */}
