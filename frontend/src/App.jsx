@@ -70,8 +70,8 @@ const Sidebar = () => {
       {/* Logo */}
       <div className="p-6 border-b border-white/10">
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-xl overflow-hidden shadow-lg ring-2 ring-white/20 flex-shrink-0 hover:ring-amber-400/50 transition-all duration-300">
-            <img src="/logo.png" alt="Logo" className="w-full h-full object-cover" />
+          <div className="w-11 h-11 bg-white rounded-xl overflow-hidden shadow-lg ring-2 ring-white/20 flex-shrink-0 hover:ring-amber-400/50 transition-all duration-300 p-1.5 flex items-center justify-center">
+            <img src="/logo.png" alt="Logo" className="w-full h-full object-contain" />
           </div>
           <div>
             <h1 className="text-lg font-bold font-['Poppins'] tracking-tight">Valeecokies</h1>
@@ -96,12 +96,12 @@ const Sidebar = () => {
       {/* Usuario y configuración */}
       <div className="p-4 border-t border-white/10 bg-black/10">
         <div className="flex items-center gap-3 mb-3">
-          <div className="w-10 h-10 bg-amber-700 rounded-full flex items-center justify-center font-bold overflow-hidden ring-2 ring-amber-500/30 relative text-sm shadow-inner">
-             <span className="absolute z-0 text-amber-200">{user?.full_name?.charAt(0) || 'U'}</span>
+          <div className="w-10 h-10 bg-amber-700 rounded-full flex items-center justify-center font-bold overflow-hidden ring-2 ring-amber-500/30 relative text-sm shadow-inner shrink-0 text-amber-100">
+             {user?.full_name?.charAt(0) || 'U'}
              <img 
-               src={`/${user?.username}.png`} 
+               src={user?.username ? `/${user.username}.png` : '/vendedor1.png'} 
                alt={user?.full_name} 
-               className="w-full h-full object-cover z-10 relative" 
+               className="w-full h-full object-cover absolute inset-0 z-10" 
                onError={(e) => { e.target.style.display = 'none'; }} 
              />
           </div>

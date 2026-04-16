@@ -229,8 +229,8 @@ const POS = () => {
     return (
       <div className="flex items-center justify-center h-screen bg-[#f8f7f4]">
         <div className="text-center">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl overflow-hidden shadow-lg animate-pulse">
-            <img src="/logo.png" alt="Logo" className="w-full h-full object-cover" />
+          <div className="w-16 h-16 mx-auto mb-4 bg-white rounded-2xl overflow-hidden shadow-lg animate-pulse p-2 flex items-center justify-center">
+            <img src="/logo.png" alt="Logo" className="w-full h-full object-contain" />
           </div>
           <p className="text-amber-800 font-semibold text-sm">Cargando Punto de Venta...</p>
         </div>
@@ -264,8 +264,8 @@ const POS = () => {
 
       {/* ===== SIDEBAR CATEGORÍAS ===== */}
       <div className="w-[88px] bg-white border-r border-gray-200 flex flex-col items-center py-5 gap-1 shadow-md">
-        <div className="w-12 h-12 rounded-xl overflow-hidden shadow-md mb-5 ring-2 ring-amber-100">
-          <img src="/logo.png" alt="Logo" className="w-full h-full object-cover" />
+        <div className="w-12 h-12 bg-white rounded-xl overflow-hidden shadow-md mb-5 ring-2 ring-amber-100 p-1 flex items-center justify-center">
+          <img src="/logo.png" alt="Logo" className="w-full h-full object-contain" />
         </div>
 
         {categories.map(cat => (
@@ -407,10 +407,10 @@ const POS = () => {
         {/* Items del carrito - scrollable */}
         <div className="flex-1 overflow-y-auto px-4 py-3 min-h-0">
           {cart.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-gray-300 py-12">
-              <Package className="w-12 h-12 mb-3 stroke-[1.5]" />
-              <p className="text-sm font-medium">Carrito vacío</p>
-              <p className="text-xs mt-1">Toca un producto para agregarlo</p>
+            <div className="flex flex-col items-center justify-center h-full text-gray-500 py-12">
+              <Package className="w-12 h-12 mb-3 stroke-[1.5] text-gray-400" />
+              <p className="text-sm font-bold text-gray-600">Carrito vacío</p>
+              <p className="text-xs mt-1 text-gray-500">Toca un producto para agregarlo</p>
             </div>
           ) : (
             <div className="space-y-2">
