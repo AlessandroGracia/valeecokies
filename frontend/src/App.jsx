@@ -209,6 +209,11 @@ function AppContent() {
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>
         </div>
+      </div>
+    </div>
+  );
+}
+
 function App() {
   return (
     <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
