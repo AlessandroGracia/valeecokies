@@ -120,7 +120,7 @@ class POSSaleService:
                 payment_method=PaymentMethod(payment_method),
                 payment_received=payment_received,
                 change_returned=change,
-                status=SaleStatus.COMPLETADA,
+                status=SaleStatus.completada,
                 notes=notes
             )
             

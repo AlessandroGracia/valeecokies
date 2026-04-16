@@ -208,7 +208,7 @@ class SaleService:
                 payment_method=PaymentMethod(sale_data.payment_method),
                 payment_received=sale_data.payment_received,
                 change_returned=change,
-                status=SaleStatus.COMPLETADA,
+                status=SaleStatus.completada,
                 notes=sale_data.notes,
                 sale_date=datetime.now()
             )
@@ -319,7 +319,7 @@ class SaleService:
                 payment_method=PaymentMethod(payment_method),
                 payment_received=payment_received,
                 change_returned=change,
-                status=SaleStatus.COMPLETADA,
+                status=SaleStatus.completada,
                 notes=notes,
                 sale_date=datetime.now()
             )
@@ -413,7 +413,7 @@ class SaleService:
         
         # Filtrar por estado
         if status_filter:
-            query = query.filter(Sale.status == SaleStatus(status_filter))
+            query = query.filter(Sale.status == SaleStatus(status_filter.lower()))
         
         # Filtrar por rango de fechas
         if date_from:
@@ -453,7 +453,7 @@ class SaleService:
         """
         sale = SaleService.get_sale_by_id(db, sale_id)
         
-        if sale.status == SaleStatus.ANULADA:
+        if sale.status == SaleStatus.anulada:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="La venta ya está anulada"
@@ -467,7 +467,7 @@ class SaleService:
                     product.stock_quantity += item.quantity
             
             # Marcar como anulada
-            sale.status = SaleStatus.ANULADA
+            sale.status = SaleStatus.anulada
             
             db.commit()
             db.refresh(sale)
@@ -493,13 +493,13 @@ class SaleService:
             query = query.filter(func.date(Sale.sale_date) <= date_to)
         
         total_sales = query.count()
-        completed = query.filter(Sale.status == SaleStatus.COMPLETADA).count()
-        pending = query.filter(Sale.status == SaleStatus.PENDIENTE).count()
-        cancelled = query.filter(Sale.status == SaleStatus.ANULADA).count()
+        completed = query.filter(Sale.status == SaleStatus.completada).count()
+        pending = query.filter(Sale.status == SaleStatus.pendiente).count()
+        cancelled = query.filter(Sale.status == SaleStatus.anulada).count()
         
         # Total vendido (solo completadas)
         total_amount = db.query(func.sum(Sale.total)).filter(
-            Sale.status == SaleStatus.COMPLETADA
+            Sale.status == SaleStatus.completada
         ).scalar() or Decimal(0)
         
         # Promedio por venta
@@ -520,13 +520,13 @@ class SaleService:
         """Obtiene ventas de un día específico"""
         sales = db.query(Sale).filter(
             func.date(Sale.sale_date) == target_date,
-            Sale.status == SaleStatus.COMPLETADA
+            Sale.status == SaleStatus.completada
         ).all()
         
         total_amount = sum(sale.total for sale in sales)
-        cash = sum(sale.total for sale in sales if sale.payment_method == PaymentMethod.EFECTIVO)
-        card = sum(sale.total for sale in sales if sale.payment_method == PaymentMethod.TARJETA)
-        transfer = sum(sale.total for sale in sales if sale.payment_method == PaymentMethod.TRANSFERENCIA)
+        cash = sum(sale.total for sale in sales if sale.payment_method == PaymentMethod.efectivo)
+        card = sum(sale.total for sale in sales if sale.payment_method == PaymentMethod.tarjeta)
+        transfer = sum(sale.total for sale in sales if sale.payment_method == PaymentMethod.transferencia)
         
         return {
             "date": target_date.isoformat(),

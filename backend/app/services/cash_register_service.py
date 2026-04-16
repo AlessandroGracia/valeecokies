@@ -37,7 +37,7 @@ class CashRegisterService:
     def is_cash_register_open(db: Session) -> bool:
         """Verifica si hay una caja abierta hoy"""
         cash_register = CashRegisterService.get_today_cash_register(db)
-        return cash_register is not None and cash_register.status == CashRegisterStatus.ABIERTA
+        return cash_register is not None and cash_register.status == CashRegisterStatus.abierta
     
     
     @staticmethod
@@ -67,7 +67,7 @@ class CashRegisterService:
             cash_register = DailyCashRegister(
                 user_id=user_id,
                 date=date.today(),
-                status=CashRegisterStatus.ABIERTA,
+                status=CashRegisterStatus.abierta,
                 initial_cash=data.initial_cash,
                 opened_at=datetime.now()
             )
@@ -124,7 +124,7 @@ class CashRegisterService:
         
         # Verificar que hay caja abierta
         cash_register = CashRegisterService.get_today_cash_register(db)
-        if not cash_register or cash_register.status != CashRegisterStatus.ABIERTA:
+        if not cash_register or cash_register.status != CashRegisterStatus.abierta:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="No hay caja abierta para registrar mermas"
@@ -196,7 +196,7 @@ class CashRegisterService:
         
         # Obtener caja abierta
         cash_register = CashRegisterService.get_today_cash_register(db)
-        if not cash_register or cash_register.status != CashRegisterStatus.ABIERTA:
+        if not cash_register or cash_register.status != CashRegisterStatus.abierta:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="No hay caja abierta para cerrar"
@@ -207,7 +207,7 @@ class CashRegisterService:
             sales = db.query(Sale).filter(
                 and_(
                     Sale.sale_date >= cash_register.opened_at,
-                    Sale.status == SaleStatus.COMPLETADA
+                    Sale.status == SaleStatus.completada
                 )
             ).all()
             
@@ -215,15 +215,15 @@ class CashRegisterService:
             total_sales = sum(sale.total for sale in sales)
             cash_sales = sum(
                 sale.total for sale in sales 
-                if sale.payment_method == PaymentMethod.EFECTIVO
+                if sale.payment_method == PaymentMethod.efectivo
             )
             card_sales = sum(
                 sale.total for sale in sales 
-                if sale.payment_method == PaymentMethod.TARJETA
+                if sale.payment_method == PaymentMethod.tarjeta
             )
             transfer_sales = sum(
                 sale.total for sale in sales 
-                if sale.payment_method == PaymentMethod.TRANSFERENCIA
+                if sale.payment_method == PaymentMethod.transferencia
             )
             
             # Efectivo esperado = inicial + ventas en efectivo
@@ -253,7 +253,7 @@ class CashRegisterService:
             cash_register.actual_cash = data.actual_cash
             cash_register.cash_difference = cash_difference
             cash_register.closing_notes = data.closing_notes
-            cash_register.status = CashRegisterStatus.CERRADA
+            cash_register.status = CashRegisterStatus.cerrada
             cash_register.closed_at = datetime.now()
             
             db.commit()
@@ -326,7 +326,7 @@ class CashRegisterService:
             total_shrinkage += shrink.quantity
         
         # Obtener ventas ocurridas durante el turno de esta caja
-        query = db.query(Sale).filter(Sale.status == SaleStatus.COMPLETADA)
+        query = db.query(Sale).filter(Sale.status == SaleStatus.completada)
         if cash_register.closed_at:
             sales = query.filter(and_(
                 Sale.sale_date >= cash_register.opened_at,
@@ -337,12 +337,12 @@ class CashRegisterService:
         
         sales_count = len(sales)
         live_total_sales = sum(sale.total for sale in sales)
-        live_cash_sales = sum(sale.total for sale in sales if sale.payment_method == PaymentMethod.EFECTIVO)
-        live_card_sales = sum(sale.total for sale in sales if sale.payment_method == PaymentMethod.TARJETA)
-        live_transfer_sales = sum(sale.total for sale in sales if sale.payment_method == PaymentMethod.TRANSFERENCIA)
+        live_cash_sales = sum(sale.total for sale in sales if sale.payment_method == PaymentMethod.efectivo)
+        live_card_sales = sum(sale.total for sale in sales if sale.payment_method == PaymentMethod.tarjeta)
+        live_transfer_sales = sum(sale.total for sale in sales if sale.payment_method == PaymentMethod.transferencia)
         
         # Efectivo esperado en tiempo real = base inicial + ventas en efectivo (si está abierta)
-        expected_cash_live = cash_register.initial_cash + live_cash_sales if cash_register.status == CashRegisterStatus.ABIERTA else cash_register.expected_cash
+        expected_cash_live = cash_register.initial_cash + live_cash_sales if cash_register.status == CashRegisterStatus.abierta else cash_register.expected_cash
         
         return CashRegisterSummary(
             id=cash_register.id,
@@ -353,10 +353,10 @@ class CashRegisterService:
             total_units_sold=total_sold,
             total_shrinkage=total_shrinkage,
             total_sales_count=sales_count,
-            total_sales_amount=live_total_sales if cash_register.status == CashRegisterStatus.ABIERTA else cash_register.total_sales,
-            cash_sales=live_cash_sales if cash_register.status == CashRegisterStatus.ABIERTA else cash_register.total_cash_sales,
-            card_sales=live_card_sales if cash_register.status == CashRegisterStatus.ABIERTA else cash_register.total_card_sales,
-            transfer_sales=live_transfer_sales if cash_register.status == CashRegisterStatus.ABIERTA else cash_register.total_transfer_sales,
+            total_sales_amount=live_total_sales if cash_register.status == CashRegisterStatus.abierta else cash_register.total_sales,
+            cash_sales=live_cash_sales if cash_register.status == CashRegisterStatus.abierta else cash_register.total_cash_sales,
+            card_sales=live_card_sales if cash_register.status == CashRegisterStatus.abierta else cash_register.total_card_sales,
+            transfer_sales=live_transfer_sales if cash_register.status == CashRegisterStatus.abierta else cash_register.total_transfer_sales,
             initial_cash=cash_register.initial_cash,
             expected_cash=expected_cash_live,
             actual_cash=cash_register.actual_cash,
@@ -378,7 +378,7 @@ class CashRegisterService:
         """
         
         cash_register = CashRegisterService.get_today_cash_register(db)
-        if not cash_register or cash_register.status != CashRegisterStatus.ABIERTA:
+        if not cash_register or cash_register.status != CashRegisterStatus.abierta:
             # Si no hay caja abierta, no actualizar inventario diario
             # (el inventario general del producto ya se descuenta en el servicio de ventas)
             return
