@@ -1,24 +1,30 @@
 """
 Configuración de la base de datos usando SQLAlchemy.
-
-Soporta SQLite (desarrollo local) y PostgreSQL (Supabase/producción).
-Si PostgreSQL no está disponible, cae automáticamente a SQLite.
 """
 
-from sqlalchemy import create_engine, event
+from sqlalchemy import create_engine, event, text
 from sqlalchemy.orm import sessionmaker, declarative_base
 from app.core.config import settings
 import os
 
 def _create_engine():
-    """Crea el motor de base de datos buscando la URL en el sistema."""
+    """Crea el motor de base de datos con diagnóstico profundo."""
     
-    # 1. Buscar DATABASE_URL en variables de entorno (Prioridad Render)
-    db_url = os.environ.get("DATABASE_URL") or os.environ.get("database_url") or settings.DATABASE_URL
+    # 1. Diagnóstico de variables de entorno (Solo nombres y longitud por seguridad)
+    env_keys = list(os.environ.keys())
+    db_env = os.environ.get("DATABASE_URL")
     
-    # 2. Corregir protocolo para SQLAlchemy + Psycopg3
-    if db_url.startswith("postgresql://"):
-        db_url = db_url.replace("postgresql://", "postgresql+psycopg://", 1)
+    print(f"DIAGNÓSTICO: Variables encontradas: {len(env_keys)}")
+    print(f"DIAGNÓSTICO: DATABASE_URL presente en os.environ: {db_env is not None}")
+    
+    # URL a usar
+    raw_url = db_env or settings.DATABASE_URL
+    
+    # 2. Corregir protocolo
+    if raw_url.startswith("postgresql://"):
+        db_url = raw_url.replace("postgresql://", "postgresql+psycopg://", 1)
+    else:
+        db_url = raw_url
     
     is_cloud = "postgresql" in db_url or "psycopg" in db_url
 
@@ -28,56 +34,31 @@ def _create_engine():
             pool_pre_ping=True,
             echo=False
         )
-        # Probar conexión simple
+        # Probar conexión real
         with eng.connect() as conn:
-            from sqlalchemy import text
             conn.execute(text("SELECT 1"))
             
-        if is_cloud:
-            print("CONECTADO: PostgreSQL (Supabase) listo.")
-        else:
-            print("CONECTADO: SQLite local listo.")
-            
+        print(f"CONECTADO EXITOSAMENTE A: {'PostgreSQL' if is_cloud else 'SQLite'}")
         return eng
+        
     except Exception as e:
-        print(f"ERROR DE CONEXIÓN: {str(e)}")
-        # Si falló PostgreSQL, intentar SQLite como último recurso
-        if is_cloud:
-            print("FALLBACK: Usando SQLite temporal por fallo en Postgres.")
-            return _create_sqlite_engine("sqlite:///./galletas.db")
+        print(f"ERROR CRÍTICO AL CONECTAR: {str(e)}")
+        # Solo caemos a SQLite si estamos en local
+        if not is_cloud:
+            return create_engine("sqlite:///./galletas.db")
+        # Si es nube y falló, dejamos que falle el deploy para ver el error en Render
         raise e
-
-def _create_sqlite_engine(url):
-    """Crea motor SQLite con configuraciones apropiadas."""
-    eng = create_engine(
-        url,
-        connect_args={"check_same_thread": False},
-        echo=False
-    )
-    
-    @event.listens_for(eng, "connect")
-    def set_sqlite_pragma(dbapi_connection, connection_record):
-        cursor = dbapi_connection.cursor()
-        cursor.execute("PRAGMA foreign_keys=ON")
-        cursor.close()
-    
-    return eng
 
 # Crear el motor
 engine = _create_engine()
 
 # Fábrica de sesiones
-SessionLocal = sessionmaker(
-    autocommit=False,
-    autoflush=False,
-    bind=engine
-)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # Clase base para todos los modelos
 Base = declarative_base()
 
 def get_db():
-    """Generador de sesiones de base de datos."""
     db = SessionLocal()
     try:
         yield db
