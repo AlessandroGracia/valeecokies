@@ -43,6 +43,10 @@ app.add_middleware(
 
 # ========== ENDPOINTS DE DIAGNÓSTICO ==========
 
+@app.get("/health")
+def health_check():
+    return {"status": "healthy"}
+
 @app.get("/")
 def read_root():
     return {
