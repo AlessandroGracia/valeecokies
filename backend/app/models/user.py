@@ -12,14 +12,15 @@ import enum
 
 
 class UserRole(enum.Enum):
-    """
-    Enumeración de roles de usuario.
-    
-    - ADMIN: Acceso completo al sistema
-    - VENDEDOR: Solo facturación y consultas
-    """
     ADMIN = "admin"
     VENDEDOR = "vendedor"
+    
+    @classmethod
+    def _missing_(cls, value):
+        for member in cls:
+            if member.value == value.lower() or member.name == value.upper():
+                return member
+        return None
 
 
 class User(Base):

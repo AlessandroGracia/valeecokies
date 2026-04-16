@@ -12,9 +12,15 @@ import enum
 
 
 class CashRegisterStatus(enum.Enum):
-    """Estados de la caja"""
     ABIERTA = "abierta"
     CERRADA = "cerrada"
+    
+    @classmethod
+    def _missing_(cls, value):
+        for member in cls:
+            if member.value == value.lower() or member.name == value.upper():
+                return member
+        return None
 
 
 class DailyCashRegister(Base):

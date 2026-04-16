@@ -13,18 +13,30 @@ import enum
 
 
 class PaymentMethod(enum.Enum):
-    """Métodos de pago disponibles"""
     EFECTIVO = "efectivo"
     TARJETA = "tarjeta"
     TRANSFERENCIA = "transferencia"
     CREDITO = "credito"
+    
+    @classmethod
+    def _missing_(cls, value):
+        for member in cls:
+            if member.value == value.lower() or member.name == value.upper():
+                return member
+        return None
 
 
 class SaleStatus(enum.Enum):
-    """Estados de una venta"""
     PENDIENTE = "pendiente"
     COMPLETADA = "completada"
     ANULADA = "anulada"
+    
+    @classmethod
+    def _missing_(cls, value):
+        for member in cls:
+            if member.value == value.lower() or member.name == value.upper():
+                return member
+        return None
 
 
 class Sale(Base):
