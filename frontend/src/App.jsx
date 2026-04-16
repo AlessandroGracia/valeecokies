@@ -110,6 +110,7 @@ const Sidebar = () => {
             <p className="text-[11px] text-amber-400/70 capitalize">{user?.role || 'vendedor'}</p>
           </div>
         </div>
+        <p className="text-[9px] text-white/20 px-1 mb-2">Version: V-2</p>
         <button 
           onClick={logout}
           className="w-full bg-white/10 hover:bg-red-600/80 rounded-lg py-2 text-sm flex items-center justify-center gap-2 transition-all duration-300 text-amber-200 hover:text-white"
