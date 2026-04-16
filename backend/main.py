@@ -5,7 +5,7 @@ Aplicación Principal FastAPI - POS Galletas.
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api import auth, products, customers, sales, cash_register_router, pos_router
-from app.core.database import engine, Base
+from app.core.database import engine
 import os
 
 app = FastAPI(
@@ -23,7 +23,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Endpoint de Salud para Render
+# Endpoint de Salud
 @app.get("/health")
 def health_check():
     return {"status": "ok", "environment": "production"}
@@ -32,7 +32,6 @@ def health_check():
 @app.get("/api/debug-db")
 def debug_db():
     from sqlalchemy import text
-    import os
     from datetime import datetime
     
     db_info = "Desconocido"
@@ -55,17 +54,16 @@ def debug_db():
         "database_detected": db_info,
         "users_found": users_count,
         "error": error,
-        "server_time": datetime.now().isoformat(),
-        "host_info": os.environ.get("DATABASE_URL", "SQLite").split("@")[-1] if "@" in os.environ.get("DATABASE_URL", "") else "local"
+        "server_time": datetime.now().isoformat()
     }
 
-# Incluir rutas de la API con los nombres correctos
-app.include_router(auth.router, prefix="/api/auth", tags=["Autenticación"])
-app.include_router(products.router, prefix="/api/items", tags=["Productos"])
-app.include_router(customers.router, prefix="/api/customers", tags=["Clientes"])
-app.include_router(sales.router, prefix="/api/sales", tags=["Ventas"])
-app.include_router(cash_register_router.router, prefix="/api/cash", tags=["Caja"])
-app.include_router(pos_router.router, prefix="/api/pos", tags=["POS"])
+# Incluir rutas SIN prefijos duplicados (ya que los archivos ya los traen)
+app.include_router(auth.router)
+app.include_router(products.router)
+app.include_router(customers.router)
+app.include_router(sales.router)
+app.include_router(cash_register_router.router)
+app.include_router(pos_router.router)
 
 @app.get("/")
 def read_root():
