@@ -7,9 +7,11 @@ Aquí se configura la aplicación y se registran las rutas.
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from datetime import datetime
 
 from app.core.config import settings
-from app.core.database import engine, Base
+from app.core.database import engine, Base, SessionLocal
+from app.models.user import User
 
 # Importar routers
 from app.api.products import router as products_router
@@ -26,31 +28,11 @@ Base.metadata.create_all(bind=engine)
 app = FastAPI(
     title=settings.APP_NAME,
     version=settings.VERSION,
-    description="""
-    ## API REST para Sistema de Facturación de Galletas 🍪
-    
-    Sistema completo con:
-    - ✅ Gestión de Productos
-    - ✅ Gestión de Clientes
-    - ✅ Facturación completa
-    - ✅ Punto de Venta (POS)
-    - ✅ Caja Diaria
-    - 🔜 Integración con IA (Claude)
-    - 🔜 Autenticación JWT
-    
-    **Endpoints disponibles:**
-    - `/api/products` - CRUD de productos
-    - `/api/customers` - CRUD de clientes
-    - `/api/sales` - Facturación y ventas
-    - `/api/cash-register` - Caja diaria
-    - `/api/pos` - Punto de venta
-    """,
-    docs_url="/docs",  # Documentación Swagger en /docs
-    redoc_url="/redoc"  # Documentación alternativa en /redoc
+    docs_url="/docs",
+    redoc_url="/redoc"
 )
 
 # Configuración de CORS
-# Permitimos todos los orígenes para que el .exe (file://) pueda conectarse.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -59,82 +41,61 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ========== ENDPOINTS RAÍZ ==========
+# ========== ENDPOINTS DE DIAGNÓSTICO ==========
 
 @app.get("/")
-async def root():
-    """
-    Endpoint raíz de bienvenida.
-    
-    Útil para verificar que la API está funcionando.
-    """
+def read_root():
     return {
         "message": f"Bienvenido a {settings.APP_NAME} 🍪",
         "version": settings.VERSION,
-        "status": "online",
-        "docs": "/docs",
-        "endpoints": {
-            "products": "/api/products",
-            "customers": "/api/customers",
-            "sales": "/api/sales",
-            "cash_register": "/api/cash-register",
-            "pos": "/api/pos"
-        },
-        "features": {
-            "facturacion": "✅ Activa",
-            "inventario": "✅ Activo",
-            "clientes": "✅ Activo",
-            "caja_diaria": "✅ Activa",
-            "pos": "✅ Activo",
-            "ia_integration": "🔜 Próximamente",
-            "autenticacion": "🔜 Próximamente"
-        }
+        "status": "online"
     }
 
-
-@app.get("/health")
-async def health_check():
-    """
-    Endpoint de salud del sistema.
+@app.get("/api/debug-db")
+def debug_db():
+    from sqlalchemy import text
+    db_type = "Desconocido"
+    user_count = 0
+    db_status = "Error"
+    error_msg = None
     
-    Se usa para monitoreo y verificar que todo funciona correctamente.
-    """
+    try:
+        # Detectar tipo de DB desde la URL
+        db_url = str(engine.url)
+        if "postgresql" in db_url or "psycopg" in db_url:
+            db_type = "PostgreSQL (Nube)"
+        else:
+            db_type = "SQLite (Local)"
+            
+        # Probar conexión y contar usuarios
+        with SessionLocal() as db:
+            user_count = db.query(User).count()
+            db_status = "OK (Conectado)"
+    except Exception as e:
+        db_status = "Error de Conexión"
+        error_msg = str(e)
+        
     return {
-        "status": "healthy",
-        "database": "connected",
-        "app_name": settings.APP_NAME,
-        "version": settings.VERSION
+        "status": db_status,
+        "database_detected": db_type,
+        "users_found": user_count,
+        "error": error_msg,
+        "server_time": datetime.now().isoformat(),
+        "host_info": str(engine.url).split("@")[-1] if "@" in str(engine.url) else "local"
     }
-
 
 # ========== REGISTRAR ROUTERS ==========
 
-# Registrar router de productos
 app.include_router(products_router)
-
-# Registrar router de clientes
 app.include_router(customers_router)
-
-# Registrar router de ventas
 app.include_router(sales_router)
-
-# Registrar router de caja diaria
 app.include_router(cash_register_router)
-
-# Registrar router de punto de venta
 app.include_router(pos_router)
 
 # Registrar autenticación
 from app.api.auth import router as auth_router
 app.include_router(auth_router)
 
-
 if __name__ == "__main__":
     import uvicorn
-    # Ejecutar el servidor
-    uvicorn.run(
-        "main:app",
-        host="0.0.0.0",
-        port=8000,
-        reload=settings.DEBUG  # Auto-reload en modo debug
-    )
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=settings.DEBUG)
