@@ -63,3 +63,6 @@ logs/
 # Build outputs
 frontend/dist/
 backend/dist/
+
+.env.db
+backups/

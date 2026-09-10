@@ -8,22 +8,25 @@
 import axios from 'axios';
 
 const getBackendURL = () => {
-  // PRIORIDAD 1: Forzar la URL de Render si estamos en la web
-  if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-    return 'https://valeecokies.onrender.com';
-  }
-
-  // PRIORIDAD 2: Variables de entorno de Vite
-  if (import.meta.env.PROD && import.meta.env.VITE_API_URL) {
+  // Si definimos una URL explícita, usarla primero.
+  if (import.meta.env.VITE_API_URL) {
     return import.meta.env.VITE_API_URL;
   }
 
-  // PRIORIDAD 3: LocalStorage (para desarrollo local)
+  // Permite configurar manualmente el backend para Electron/desarrollo.
   const savedIP = localStorage.getItem('backend_url');
-  if (savedIP) return savedIP;
-  
-  // PRIORIDAD 4: Localhost por defecto
-  return 'http://127.0.0.1:8000';
+  if (savedIP) {
+    return savedIP;
+  }
+
+  // Electron ejecutado como aplicación local.
+  if (window.location.protocol === 'file:') {
+    return 'http://127.0.0.1:8000';
+  }
+
+  // Web: usar el mismo dominio.
+  // Nginx/Vite enviarán /api al backend.
+  return '';
 };
 
 const API_BASE_URL = getBackendURL();
