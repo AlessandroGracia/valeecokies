@@ -43,3 +43,5 @@ networks:
 
 volumes:
   valeecookies-db-data:
+    external: true
+    name: valeecokies_valeecookies-db-data
